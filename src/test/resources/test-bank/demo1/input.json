@@ -1,0 +1,26 @@
+{
+    "total": 99,
+    "items": [
+        {
+            "id": "123",
+            "name": "My Car",
+            "category": "SUV",
+            "quantity": "61",
+            "details": {
+                "color": "blue",
+                "make": "Ford"
+            }
+        },
+        {
+            "id": "456",
+            "name": "Another Car",
+            "category": "SEDAN",
+            "quantity": "13",
+            "details": {
+                "color": "blue",
+                "make": "Cadillac"
+            }
+        }
+
+    ]
+}

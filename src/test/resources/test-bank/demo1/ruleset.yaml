@@ -1,0 +1,19 @@
+output:
+  summary:
+    count:
+      type: number
+      from: total
+  list:
+    cars:
+      - serial:
+          from: items[].id
+        name:
+          from: items[].name
+        group:
+          from: items[].category
+        count:
+          from: items[].quantity
+        color:
+          from: items[].details.color
+        make:
+          from: items[].details.make

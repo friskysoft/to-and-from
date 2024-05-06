@@ -1,0 +1,16 @@
+rootInput: ROOT.INFO.PRIMARY
+output:
+  metadata.primaryId:
+    from: ID
+    type: String
+  metadata.name:
+    from: NAME
+    type: String
+  metadata.description:
+    default: this is a default description
+  metadata.absent:
+    from: ABSENT
+    type: String
+  metadata.item.count:
+    from: COUNT
+    type: NUMBER

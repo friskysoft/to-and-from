@@ -1,0 +1,10 @@
+{
+    "metadata" : {
+        "primaryId" : "abcd1234",
+        "name" : "hello world!",
+        "description" : "this is a default description",
+        "item" : {
+            "count" : 99
+        }
+    }
+}

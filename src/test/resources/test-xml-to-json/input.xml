@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ROOT>
+    <INFO xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schema='schema.xsd'>
+        <PRIMARY>
+            <ID>abcd1234</ID>
+            <ANOTHER_ID>999-xyz-123</ANOTHER_ID>
+            <NAME>hello world!</NAME>
+            <COUNT>99</COUNT>
+        </PRIMARY>
+        <SECONDARY>
+            <LOG>something</LOG>
+        </SECONDARY>
+        <SOME_LIST>
+            <ITEM>a</ITEM>
+            <ITEM>b</ITEM>
+        </SOME_LIST>
+    </INFO>
+</ROOT>

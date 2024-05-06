@@ -1,0 +1,22 @@
+rootInput: ROOT.INFO
+output:
+  metadata.primaryId:
+    from: PRIMARY.ID
+    type: string
+  metadata.name:
+    from: PRIMARY.NAME
+    type: string
+  metadata.description:
+    default: this is a default description
+  metadata.absent:
+    from: ABSENT
+    type: string
+  metadata.absentArray[]:
+    from: ABSENT_ARRAY.ITEM[]
+    type: string
+  metadata.item.count:
+    from: PRIMARY.COUNT
+    type: number
+  items[]:
+    from: SOME_LIST.ITEM[]
+    type: array

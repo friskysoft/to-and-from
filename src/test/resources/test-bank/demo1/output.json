@@ -1,0 +1,25 @@
+{
+    "summary": {
+        "count": 99
+    },
+    "list": {
+        "cars": [
+            {
+                "serial": "123",
+                "name": "My Car",
+                "group": "SUV",
+                "count": "61",
+                "color": "blue",
+                "make": "Ford"
+            },
+            {
+                "serial": "456",
+                "name": "Another Car",
+                "group": "SEDAN",
+                "count": "13",
+                "color": "blue",
+                "make": "Cadillac"
+            }
+        ]
+    }
+}

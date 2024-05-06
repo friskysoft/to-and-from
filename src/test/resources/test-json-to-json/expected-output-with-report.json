@@ -1,0 +1,30 @@
+{
+    "metadata" : {
+        "primaryId" : "abcd1234",
+        "name" : "hello world!",
+        "description" : "this is a default description",
+        "item" : {
+            "count" : 99
+        }
+    },
+    "___REPORT___" : {
+        "UNMAPPED_INPUT_TAGS" : {
+            "ROOT" : {
+                "INFO" : {
+                    "PRIMARY" : {
+                        "ANOTHER_ID" : "999-xyz-123"
+                    },
+                    "SECONDARY" : {
+                        "LOG" : "something"
+                    },
+                    "SOME_LIST" : {
+                        "ITEM" : [ "a", "b" ]
+                    }
+                }
+            }
+        },
+        "ABSENT_INPUT_TAGS" : [ "ROOT.INFO.PRIMARY.ABSENT" ],
+        "MAPPED_DUPLICATE_INPUT_TAGS" : [ ],
+        "MAPPED_DUPLICATE_OUTPUT_TAGS" : [ ]
+    }
+}

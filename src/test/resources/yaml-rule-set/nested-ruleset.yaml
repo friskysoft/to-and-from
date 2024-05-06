@@ -1,0 +1,11 @@
+output:
+  field:
+    meta:
+      - key:
+          default: foo
+        val:
+          from: props.foo
+      - key:
+          default: bar
+        val:
+          from: props.bar
