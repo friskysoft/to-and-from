@@ -1,10 +1,13 @@
 package com.friskysoft.tools.taf.utils;
 
+import lombok.experimental.UtilityClass;
+
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+@UtilityClass
 public class CommonUtil {
 
     public static Set<String> findDuplicateIgnoreCase(Set<String> keys) {

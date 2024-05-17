@@ -11,6 +11,7 @@ import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.friskysoft.tools.taf.models.DataFormat;
+import com.friskysoft.tools.taf.models.ToAndFromException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -97,7 +98,7 @@ public class MapperUtil {
                 return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
             }
         } catch (Exception ex) {
-            throw new RuntimeException("Unable to convert data to " + format, ex);
+            throw new ToAndFromException("Unable to convert data to " + format, ex);
         }
     }
 
@@ -119,7 +120,7 @@ public class MapperUtil {
                 return mapper.readValue(data, returnType);
             }
         } catch (Exception ex) {
-            throw new RuntimeException("Invalid format for " + format, ex);
+            throw new ToAndFromException("Invalid format for " + format, ex);
         }
     }
 
@@ -127,7 +128,7 @@ public class MapperUtil {
         try {
             return mapper.readValue(data, returnType);
         } catch (Exception ex) {
-            throw new RuntimeException("Invalid format for " + format, ex);
+            throw new ToAndFromException("Invalid format for " + format, ex);
         }
     }
 }

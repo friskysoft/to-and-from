@@ -1,11 +1,15 @@
 package com.friskysoft.tools.taf.utils;
 
+import com.friskysoft.tools.taf.models.ToAndFromException;
+import lombok.experimental.UtilityClass;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
+@UtilityClass
 public class FileUtil {
 
     public static boolean exists(String filepath) {
@@ -22,7 +26,7 @@ public class FileUtil {
             Path path = Paths.get(filepath);
             return Files.readString(path);
         } catch (Exception ex) {
-            throw new RuntimeException("Failed to read content from file: " + filepath, ex);
+            throw new ToAndFromException("Failed to read content from file: " + filepath, ex);
         }
     }
 
@@ -32,7 +36,7 @@ public class FileUtil {
             Files.createDirectories(path.getParent());
             Files.write(path, content.getBytes());
         } catch (Exception ex) {
-            throw new RuntimeException("Failed to save content to file: " + filepath, ex);
+            throw new ToAndFromException("Failed to save content to file: " + filepath, ex);
         }
     }
 
@@ -44,7 +48,7 @@ public class FileUtil {
                         .map(Path::toFile)
                         .forEach(File::delete);
             } catch (IOException ex) {
-                throw new RuntimeException("Failed to delete directory: " + path, ex);
+                throw new ToAndFromException("Failed to delete directory: " + path, ex);
             }
         }
     }

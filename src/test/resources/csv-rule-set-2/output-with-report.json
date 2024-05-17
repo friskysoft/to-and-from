@@ -1,0 +1,14 @@
+{
+  "target" : {
+    "foo" : {
+      "details" : {
+        "A" : "A is for Apple"
+      }
+    }
+  },
+  "___REPORT___" : {
+    "MAPPED_ABSENT_INPUT" : [ "field1", "field2.childB", "source.unmapped" ],
+    "MAPPED_DUPLICATE_INPUT" : [ ],
+    "MAPPED_DUPLICATE_OUTPUT" : [ ]
+  }
+}

@@ -1,0 +1,12 @@
+output:
+  target:
+    foo:
+      bar:
+        from: field1
+      details:
+        A:
+          from: field2.childA
+          default: undefined
+        B:
+          from: field2.childB
+          default: undefined

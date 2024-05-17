@@ -1,0 +1,6 @@
+from,to,default,comments
+field1,target.foo.bar,,something
+field2.childA,target.foo.details.A,undefined,
+field2.childB,target.foo.details.B,undefined,
+,target.unmapped,,
+source.unmapped,,,

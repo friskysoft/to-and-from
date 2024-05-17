@@ -1,0 +1,4 @@
+process,description,from,to,default,comments
+0,Hello,field1,target.foo.bar,,something
+1,World of A,field2.childA,target.foo.details.A,undefined,
+1,World of B,field2.childB,target.foo.details.B,undefined,

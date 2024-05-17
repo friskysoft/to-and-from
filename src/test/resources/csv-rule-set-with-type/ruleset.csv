@@ -1,0 +1,9 @@
+from,to,default,type,comments
+field1,target.foo.bar,,,something
+field3.date1,dates.datetime1,,datetime,
+field3.date2,dates.datetime2,,date,
+field3.date3,dates.datetime3,,timestamp,
+,active,true,boolean,,
+count,count,0,int,,
+field2.childA,target.foo.details.A,undefined,,
+field2.childB,target.foo.details.B,undefined,,

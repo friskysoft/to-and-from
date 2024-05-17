@@ -1,13 +1,45 @@
 plugins {
     id "java"
     id "java-library"
+    id "jacoco"
     id "signing"
     id "maven-publish"
     id "io.freefair.lombok" version "8.6"
 }
 
 group = "com.friskysoft"
-version = "0.0.1-SNAPSHOT"
+version = "0.0.5-SNAPSHOT"
+
+def scmUrl = "https://github.com/friskysoft/to-and-from"
+
+def oss = project.hasProperty('oss')
+def repsy = project.hasProperty('repsy')
+def release = project.hasProperty('release')
+def releaseVersion = project.version.split("-")[0]
+def artifactVersion = release ? releaseVersion : "${releaseVersion}-SNAPSHOT"
+
+def ossSnapshotRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+def ossReleaseRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+def ossRepoUsername = project.hasProperty('ossrhUsername') ? ossrhUsername : ""
+def ossRepoPassword = project.hasProperty('ossrhPassword') ? ossrhPassword : ""
+
+def repsySnapshotRepoUrl = "https://repsy.io/mvn/friskysoft/snapshot/"
+def repsyReleaseRepoUrl = "https://repsy.io/mvn/friskysoft/release/"
+def repsyUsername = project.hasProperty('repsyUsername') ? repsyUsername : ""
+def repsyPassword = project.hasProperty('repsyPassword') ? repsyPassword : ""
+
+def localReleaseRepoUrl = layout.buildDirectory.dir('publish/release').get().asFile.path
+def localSnapshotRepoUrl = layout.buildDirectory.dir('publish/snapshot').get().asFile.path
+
+def mavenRepo = ""
+
+if (oss) {
+    mavenRepo = release ? ossReleaseRepoUrl : ossSnapshotRepoUrl
+} else if (repsy) {
+    mavenRepo = release ? repsyReleaseRepoUrl : repsySnapshotRepoUrl
+} else { // local
+    mavenRepo = release ? localReleaseRepoUrl : localSnapshotRepoUrl
+}
 
 repositories {
     mavenCentral()
@@ -15,6 +47,10 @@ repositories {
 
 ext {
     jacksonVersion = "2.17.0"
+
+    println("* Selected upload repo: $mavenRepo")
+    println("* Artifact version: $artifactVersion")
+    println("* Jackson version: $jacksonVersion")
 }
 
 dependencies {
@@ -29,6 +65,7 @@ dependencies {
     api "org.dhatim:fastexcel-reader:0.17.0"
     api 'ch.qos.logback:logback-classic:1.5.3'
     api 'org.apache.commons:commons-collections4:4.4'
+    api 'com.opencsv:opencsv:5.9'
 
     // test
     testImplementation platform("org.junit:junit-bom:5.9.1")
@@ -40,21 +77,134 @@ dependencies {
 test {
     useJUnitPlatform()
     testLogging {
-        events "standardOut", "started", "passed", "skipped", "failed"
+        events "standardOut", "standardError", "passed", "skipped", "failed"
         showStandardStreams = true
         exceptionFormat = "full"
     }
+    finalizedBy jacocoTestReport
 }
 
-java {
-    withJavadocJar()
-    withSourcesJar()
+clean {
+    delete 'target', 'build', 'out', 'dist', 'test-output', 'test-results'
 }
+
+jacoco {
+    toolVersion = "0.8.9"
+    reportsDirectory = layout.buildDirectory.dir('jacoco')
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = false
+        csv.required = false
+        html.outputLocation = layout.buildDirectory.dir('jacoco/html')
+    }
+}
+
+gradle.taskGraph.afterTask {
+    Task task,TaskState state ->
+        if (state.failure) {    println "❌ $task.name FAILED"}
+        else               {    println "✅ $task.name SUCCESSFUL"}
+}
+
+tasks.withType(Jar).configureEach {
+    manifest {
+        attributes(
+                "Name": project.name,
+                "Implementation-Title": project.name,
+                "Implementation-Version": artifactVersion,
+                "Implementation-Vendor": "FriskySoft"
+        )
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar, javadocJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+publish.dependsOn test
+publish.dependsOn signArchives
 
 publishing {
+
+    println("* Artifacts:")
+    configurations.archives.allArtifacts.each { arc ->
+        println('  - ' + arc.file)
+    }
+
+    if (oss && release) {
+        println()
+        println("----------------------------------------------")
+        println("*** ARTIFACT WILL BE PUSHED TO OSS STAGING ***")
+        println("----------------------------------------------")
+        println()
+    }
+
+    repositories {
+        maven {
+            url = mavenRepo
+            if (oss) {
+                credentials {
+                    username ossRepoUsername
+                    password ossRepoPassword
+                }
+            } else if (repsy) {
+                credentials {
+                    username repsyUsername
+                    password repsyPassword
+                }
+            }
+        }
+    }
+
     publications {
-        maven(MavenPublication) {
+        mavenJava(MavenPublication) {
             from components.java
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom {
+                name = project.name
+                description = project.name
+                groupId = project.group
+                artifactId = project.name
+                version = artifactVersion
+                packaging = 'jar'
+                url = scmUrl
+
+                scm {
+                    url = scmUrl
+                }
+
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'hossain'
+                        name = 'Rafaat Hossain'
+                        email = 'rafaat123@gmail.com'
+                    }
+                }
+            }
         }
     }
 }

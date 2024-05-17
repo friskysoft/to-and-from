@@ -5,6 +5,7 @@ import com.friskysoft.tools.taf.models.DataType;
 import com.friskysoft.tools.taf.models.Rule;
 import com.friskysoft.tools.taf.models.RuleSet;
 import com.friskysoft.tools.taf.utils.CommonUtil;
+import com.friskysoft.tools.taf.utils.DateUtil;
 import com.friskysoft.tools.taf.utils.MapperUtil;
 import com.github.wnameless.json.flattener.JsonFlattener;
 import com.github.wnameless.json.unflattener.JsonUnflattener;
@@ -23,10 +24,11 @@ public class Converter {
     private static final Logger logger = LoggerFactory.getLogger(Converter.class);
 
     public static final String REPORT_PREFIX = "___REPORT___.";
-    public static final String REPORT_ABSENT_PREFIX = REPORT_PREFIX + "ABSENT_INPUT_TAGS";
-    public static final String REPORT_UNMAPPED_PREFIX = REPORT_PREFIX + "UNMAPPED_INPUT_TAGS";
-    public static final String REPORT_DUPLICATE_INPUT_PREFIX = REPORT_PREFIX + "MAPPED_DUPLICATE_INPUT_TAGS";
-    public static final String REPORT_DUPLICATE_OUTPUT_PREFIX = REPORT_PREFIX + "MAPPED_DUPLICATE_OUTPUT_TAGS";
+    public static final String REPORT_ABSENT_PREFIX = REPORT_PREFIX + "MAPPED_ABSENT_INPUT";
+    public static final String REPORT_UNMAPPED_PREFIX = REPORT_PREFIX + "UNMAPPED_PRESENT_INPUT";
+    public static final String REPORT_UNMAPPED_TARGET_PREFIX = REPORT_PREFIX + "UNMAPPED_INPUT";
+    public static final String REPORT_DUPLICATE_INPUT_PREFIX = REPORT_PREFIX + "MAPPED_DUPLICATE_INPUT";
+    public static final String REPORT_DUPLICATE_OUTPUT_PREFIX = REPORT_PREFIX + "MAPPED_DUPLICATE_OUTPUT";
 
     public static String convert(final String input,
                                  final DataFormat inputFormat,
@@ -58,10 +60,15 @@ public class Converter {
         final Map<String, Object> flatOutputMap = new LinkedHashMap<>();
 
         ruleset.getOutput().forEach((key, rule) -> {
-            final String outputKey = ruleset.getRootOutput() + (StringUtils.isBlank(ruleset.getRootOutput()) ? "" : ".") + key;
+            final String outputKey;
+            if (StringUtils.isBlank(ruleset.getRootOutput()) && !key.startsWith(REPORT_PREFIX)) {
+                outputKey = ruleset.getRootOutput() + "." + key;
+            } else {
+                outputKey = key;
+            }
             if (StringUtils.isBlank(rule.getFrom()) && StringUtils.isNotBlank(rule.getDefaultValue())) {
                 // no source mapped, but default available, so set default value directly
-                flatOutputMap.put(outputKey, rule.getDefaultValue());
+                flatOutputMap.put(outputKey, convertVal(rule, rule.getDefaultValue(), inputMap));
             } else {
                 // source is mapped
                 final String inputKey = ruleset.getRootInput() + (StringUtils.isBlank(ruleset.getRootInput()) ? "" : ".") + rule.getFrom();
@@ -73,7 +80,9 @@ public class Converter {
                     flatOutputMap.put(outputKey, outputVal);
                 } else { //TODO: if not array
                     // mapped source key was not present in the input message
-                    absentInputKeys.add(inputKey);
+                    if (StringUtils.isNotBlank(inputKey) && !inputKey.equalsIgnoreCase("null")) {
+                        absentInputKeys.add(inputKey);
+                    }
                 }
             }
         });
@@ -91,6 +100,8 @@ public class Converter {
             // report duplicate mapped keys (often multiple casing)
             flatOutputMap.put(REPORT_DUPLICATE_INPUT_PREFIX, findDuplicateInputKeys(ruleset));
             flatOutputMap.put(REPORT_DUPLICATE_OUTPUT_PREFIX, findDuplicateOutputKeys(ruleset));
+        } else {
+            flatOutputMap.entrySet().removeIf(entry -> entry.getKey().startsWith(REPORT_PREFIX));
         }
 
         final Map<String, Object> outputMap = JsonUnflattener.unflattenAsMap(flatOutputMap);
@@ -110,6 +121,8 @@ public class Converter {
             return Boolean.parseBoolean(outputVal);
         } else if (rule.getType() == DataType.DECIMAL) {
             return Double.valueOf(outputVal);
+        } else if (DateUtil.DATE_FORMAT_MAP.containsKey(rule.getType())) {
+            return DateUtil.convert(outputVal, rule.getType());
         } else {
             return outputVal;
         }

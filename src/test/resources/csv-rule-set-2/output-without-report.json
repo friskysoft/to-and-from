@@ -1,0 +1,9 @@
+{
+  "target" : {
+    "foo" : {
+      "details" : {
+        "A" : "A is for Apple"
+      }
+    }
+  }
+}

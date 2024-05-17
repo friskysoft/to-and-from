@@ -1,0 +1,16 @@
+{
+  "active" : true,
+  "count": 99,
+  "target" : {
+    "foo" : {
+      "details" : {
+        "A" : "A is for Apple"
+      }
+    }
+  },
+  "dates" : {
+    "datetime1" : "2024-12-13T00:00:00Z",
+    "datetime2" : "2024-12-31",
+    "datetime3" : "1734069671000"
+  }
+}

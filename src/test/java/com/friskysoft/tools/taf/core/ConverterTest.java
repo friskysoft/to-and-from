@@ -2,16 +2,21 @@ package com.friskysoft.tools.taf.core;
 
 import com.friskysoft.tools.taf.models.Rule;
 import com.friskysoft.tools.taf.models.RuleSet;
+import com.friskysoft.tools.taf.parser.CSVRuleSetParser;
+import com.friskysoft.tools.taf.parser.FileRuleSetTest;
 import com.friskysoft.tools.taf.parser.YamlRuleSetParser;
 import com.friskysoft.tools.taf.utils.FileUtil;
 import com.friskysoft.tools.taf.utils.MapperUtil;
 import com.friskysoft.tools.taf.models.DataFormat;
 import com.friskysoft.tools.taf.utils.ResourceUtil;
 import com.github.wnameless.json.flattener.JsonFlattener;
+import org.assertj.core.api.Assertions;
 import org.json.JSONException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.*;
@@ -19,6 +24,8 @@ import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ConverterTest {
+
+    private static final Logger log = LoggerFactory.getLogger(ConverterTest.class);
 
     @Test
     public void testResolveArrayMappings() {
@@ -127,8 +134,8 @@ public class ConverterTest {
                 ),
                 "items", List.of("a", "b"),
                 "___REPORT___", Map.of(
-                        "ABSENT_INPUT_TAGS", Set.of("ROOT.INFO.ABSENT", "ROOT.INFO.ABSENT_ARRAY.ITEM[]"),
-                        "UNMAPPED_INPUT_TAGS", Map.of(
+                        "MAPPED_ABSENT_INPUT", Set.of("ROOT.INFO.ABSENT", "ROOT.INFO.ABSENT_ARRAY.ITEM[]"),
+                        "UNMAPPED_PRESENT_INPUT", Map.of(
                                 "ROOT", Map.of(
                                         "INFO", Map.of(
                                                 "schema", "schema.xsd",
@@ -141,8 +148,8 @@ public class ConverterTest {
                                         )
                                 )
                         ),
-                        "MAPPED_DUPLICATE_INPUT_TAGS", Set.of(),
-                        "MAPPED_DUPLICATE_OUTPUT_TAGS", Set.of()
+                        "MAPPED_DUPLICATE_INPUT", Set.of(),
+                        "MAPPED_DUPLICATE_OUTPUT", Set.of()
                 )
         );
         String expected = MapperUtil.json().write(expectedMap);
@@ -208,5 +215,40 @@ public class ConverterTest {
             System.out.println(expectedOutput);
             JSONAssert.assertEquals(expectedOutput, output, true);
         }
+    }
+
+    @Test
+    public void testConvertUsingCSVRules() throws Exception {
+        String rulesFile = ResourceUtil.absolutePath("csv-rule-set-2/ruleset.csv");
+        RuleSet ruleSet = new CSVRuleSetParser().parseRuleSet(rulesFile);
+
+        String input = ResourceUtil.readFile("csv-rule-set-2/input.json");
+
+        String output = Converter.convert(input, DataFormat.JSON, DataFormat.JSON, ruleSet, false);
+        log.info(output);
+        String expectedOutput = ResourceUtil.readFile("csv-rule-set-2/output-without-report.json");
+        JSONAssert.assertEquals(expectedOutput, output, true);
+
+        String outputWithReport = Converter.convert(input, DataFormat.JSON, DataFormat.JSON, ruleSet, true);
+        log.info(outputWithReport);
+        String expectedOutputWithReport = ResourceUtil.readFile("csv-rule-set-2/output-with-report.json");
+        JSONAssert.assertEquals(expectedOutputWithReport, outputWithReport, true);
+    }
+
+    @Test
+    public void testConvertTypedFields() throws Exception {
+        CSVRuleSetParser parser = CSVRuleSetParser.builder().defaultValueColumn(2).typeColumn(3).build();
+
+        String rulesFile = ResourceUtil.absolutePath("csv-rule-set-with-type/ruleset.csv");
+        RuleSet ruleSet = parser.parseRuleSet(rulesFile);
+        String input = ResourceUtil.readFile("csv-rule-set-with-type/input.json");
+
+        String output = Converter.convert(input, DataFormat.JSON, DataFormat.JSON, ruleSet, false);
+        log.info("output:\n{}", output);
+
+        String expectedOutput = ResourceUtil.readFile("csv-rule-set-with-type/output.json");
+        log.info("expectedOutput:\n{}", expectedOutput);
+
+        JSONAssert.assertEquals(expectedOutput, output, true);
     }
 }

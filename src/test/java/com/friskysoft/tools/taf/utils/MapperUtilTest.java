@@ -1,6 +1,5 @@
 package com.friskysoft.tools.taf.utils;
 
-import com.friskysoft.tools.taf.utils.MapperUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 

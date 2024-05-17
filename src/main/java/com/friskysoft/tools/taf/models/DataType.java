@@ -9,10 +9,13 @@ public enum DataType {
     STRING("TEXT", "CHAR", "VARCHAR"),
     NUMBER("INT", "INTEGER", "LONG"),
     DECIMAL("FLOAT", "DOUBLE", "FRACTION"),
-    DATE("DATE"),
-    DATETIME("TIME", "TIMESTAMP"),
+    DATE("DATE", "YYYY_MM_DD"),
+    DATE_US("US_DATE", "MM_DD_YYYY"),
+    DATETIME("TIME", "DATETIME_ISO"),
+    DATETIME_SQL("DATETIME_SQL"),
+    TIMESTAMP("EPOCH", "MILLIS", "EPOCH_MILLIS"),
     BOOLEAN("BOOL", "TRUE_FALSE"),
-    ARRAY("LIST", "COLLECTION"),
+    ARRAY("LIST", "SET", "COLLECTION"),
     OBJECT("NESTED", "MAP");
 
     private final String[] aliases;
