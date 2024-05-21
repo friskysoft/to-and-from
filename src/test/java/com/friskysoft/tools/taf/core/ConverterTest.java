@@ -3,20 +3,19 @@ package com.friskysoft.tools.taf.core;
 import com.friskysoft.tools.taf.models.Rule;
 import com.friskysoft.tools.taf.models.RuleSet;
 import com.friskysoft.tools.taf.parser.CSVRuleSetParser;
-import com.friskysoft.tools.taf.parser.FileRuleSetTest;
 import com.friskysoft.tools.taf.parser.YamlRuleSetParser;
 import com.friskysoft.tools.taf.utils.FileUtil;
 import com.friskysoft.tools.taf.utils.MapperUtil;
 import com.friskysoft.tools.taf.models.DataFormat;
 import com.friskysoft.tools.taf.utils.ResourceUtil;
 import com.github.wnameless.json.flattener.JsonFlattener;
-import org.assertj.core.api.Assertions;
 import org.json.JSONException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xmlunit.assertj.XmlAssert;
 
 import java.io.File;
 import java.util.*;
@@ -124,7 +123,7 @@ public class ConverterTest {
         String xmlInput = ResourceUtil.readFile("test-xml-to-json/input.xml");
 
         String output = Converter.convert(xmlInput, DataFormat.XML, DataFormat.JSON, ruleset, true);
-        System.out.println(output);
+        log.info("Output:\n{}", output);
         Map<String, Object> expectedMap = Map.of(
                 "metadata", Map.of(
                         "primaryId", "abcd1234",
@@ -157,7 +156,7 @@ public class ConverterTest {
 
         // without additional reports
         String outputNoReports = Converter.convert(xmlInput, DataFormat.XML, DataFormat.JSON, ruleset, false);
-        System.out.println(outputNoReports);
+        log.info("Output:\n{}", outputNoReports);
 
         Map<String, Object> expectedMap2 = Map.of(
                 "metadata", expectedMap.get("metadata"),
@@ -168,6 +167,27 @@ public class ConverterTest {
     }
 
     @Test
+    public void testJsonToXml() throws JSONException {
+        String rulesetPath = ResourceUtil.absolutePath("test-json-to-xml/ruleset.yaml");
+        RuleSet ruleset = YamlRuleSetParser.instance().parseRuleSet(rulesetPath);
+        ruleset.setRootOutput("out");
+
+        String jsonInput = ResourceUtil.readFile("test-json-to-xml/input.json");
+
+        String output = Converter.convert(jsonInput, DataFormat.JSON, DataFormat.XML, ruleset, true);
+        log.info("Output:\n{}", output);
+        String expectedOutput = ResourceUtil.readFile("test-json-to-xml/expected-output-with-report.xml");
+        XmlAssert.assertThat(output).and(expectedOutput).ignoreChildNodesOrder().areSimilar();
+
+        // without additional reports
+        String outputNoReports = Converter.convert(jsonInput, DataFormat.JSON, DataFormat.XML, ruleset, false);
+        log.info("Output:\n{}", outputNoReports);
+
+        String expectedOutputNoReport = ResourceUtil.readFile("test-json-to-xml/expected-output-no-report.xml");
+        XmlAssert.assertThat(expectedOutputNoReport).and(outputNoReports).ignoreChildNodesOrder().areSimilar();
+    }
+
+    @Test
     public void testJsonToJson() throws JSONException {
         String rulesetPath = ResourceUtil.absolutePath("test-json-to-json/ruleset.yaml");
         RuleSet ruleset = YamlRuleSetParser.instance().parseRuleSet(rulesetPath);
@@ -175,13 +195,13 @@ public class ConverterTest {
         String jsonInput = ResourceUtil.readFile("test-json-to-json/input.json");
 
         String output = Converter.convert(jsonInput, DataFormat.JSON, DataFormat.JSON, ruleset, true);
-        System.out.println(output);
+        log.info("Output:\n{}", output);
         String expectedOutput = ResourceUtil.readFile("test-json-to-json/expected-output-with-report.json");
         JSONAssert.assertEquals(expectedOutput, output, false);
 
         // without additional reports
         String outputNoReports = Converter.convert(jsonInput, DataFormat.JSON, DataFormat.JSON, ruleset, false);
-        System.out.println(outputNoReports);
+        log.info("Output:\n{}", outputNoReports);
 
         String expectedOutputNoReport = ResourceUtil.readFile("test-json-to-json/expected-output-no-report.json");
         JSONAssert.assertEquals(expectedOutputNoReport, outputNoReports, true);
@@ -194,8 +214,7 @@ public class ConverterTest {
 
         for (File dir : directories) {
             RuleSet ruleset = YamlRuleSetParser.instance().parseRuleSet(dir.getAbsolutePath() + "/ruleset.yaml");
-            System.out.println("--- RULESET ---");
-            System.out.println(MapperUtil.yaml().write(ruleset));
+            log.info("--- RULESET ---\n{}", MapperUtil.yaml().write(ruleset));
 
             String input;
             String output;
@@ -206,13 +225,10 @@ public class ConverterTest {
                 input = ResourceUtil.readFile(dir.getAbsolutePath() + "/input.json");
                 output = Converter.convert(input, DataFormat.JSON, DataFormat.JSON, ruleset, false);
             }
-            System.out.println("--- INPUT ---");
-            System.out.println(input);
-            System.out.println("--- CONVERTED OUTPUT ---");
-            System.out.println(output);
+            log.info("--- INPUT ---\n{}", input);
+            log.info("--- CONVERTED OUTPUT ---\n{}", output);
             String expectedOutput = ResourceUtil.readFile(dir.getAbsolutePath() + "/output.json");
-            System.out.println("--- EXPECTED OUTPUT ---");
-            System.out.println(expectedOutput);
+            log.info("--- EXPECTED OUTPUT ---\n{}", expectedOutput);
             JSONAssert.assertEquals(expectedOutput, output, true);
         }
     }

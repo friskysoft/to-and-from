@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<list>
+    <item>
+        <primaryId>abcd-1234</primaryId>
+        <item>hello world!</item>
+        <description>this is a description</description>
+    </item>
+    <item>
+        <primaryId>efef-9876</primaryId>
+        <item>hello another world</item>
+        <description>we are in a multiverse</description>
+    </item>
+</list>

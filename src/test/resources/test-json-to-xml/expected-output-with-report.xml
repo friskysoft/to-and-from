@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<out>
+    <metadata>
+        <item>
+            <count>99</count>
+        </item>
+        <name>hello world!</name>
+        <description>this is a default description</description>
+        <primaryId>abcd1234</primaryId>
+    </metadata>
+    <___REPORT___>
+        <UNMAPPED_PRESENT_INPUT>
+            <ROOT>
+                <INFO>
+                    <PRIMARY>
+                        <ANOTHER_ID>999-xyz-123</ANOTHER_ID>
+                    </PRIMARY>
+                    <SECONDARY>
+                        <LOG>something</LOG>
+                    </SECONDARY>
+                    <SOME_LIST>
+                        <ITEM>b</ITEM>
+                        <ITEM>a</ITEM>
+                    </SOME_LIST>
+                </INFO>
+            </ROOT>
+        </UNMAPPED_PRESENT_INPUT>
+        <MAPPED_ABSENT_INPUT>ROOT.INFO.PRIMARY.ABSENT</MAPPED_ABSENT_INPUT>
+    </___REPORT___>
+</out>

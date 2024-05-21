@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<out>
+    <metadata>
+        <item>
+            <count>99</count>
+        </item>
+        <name>hello world!</name>
+        <description>this is a default description</description>
+        <primaryId>abcd1234</primaryId>
+    </metadata>
+</out>

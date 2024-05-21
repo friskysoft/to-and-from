@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Converter {
 
@@ -59,13 +60,27 @@ public class Converter {
         final Map<String, String> allMappedKeys = new LinkedHashMap<>();
         final Map<String, Object> flatOutputMap = new LinkedHashMap<>();
 
+        if (outputFormat == DataFormat.XML && StringUtils.isBlank(ruleset.getRootOutput())) {
+            // XML requires a root tag. So make sure there is a unique root tag present. If not, we will assign one.
+            final Set<String> rootKeys = ruleset.getOutput().keySet().stream().map(k -> k.split("\\.")[0]).collect(Collectors.toSet());
+            if (rootKeys.size() != 1) {
+                logger.warn("Unique root XML tag was not present for output. Forcing \"ROOT\" as root tag.");
+                ruleset.setRootOutput("ROOT");
+            }
+        }
+
+        final String outputPrefix = ruleset.getRootOutput() + ".";
+
         ruleset.getOutput().forEach((key, rule) -> {
+
             final String outputKey;
-            if (StringUtils.isBlank(ruleset.getRootOutput()) && !key.startsWith(REPORT_PREFIX)) {
-                outputKey = ruleset.getRootOutput() + "." + key;
+            if (StringUtils.isNotBlank(ruleset.getRootOutput()) &&
+                    (outputFormat == DataFormat.XML || !key.startsWith(REPORT_PREFIX))) {
+                outputKey = outputPrefix + key;
             } else {
                 outputKey = key;
             }
+
             if (StringUtils.isBlank(rule.getFrom()) && StringUtils.isNotBlank(rule.getDefaultValue())) {
                 // no source mapped, but default available, so set default value directly
                 flatOutputMap.put(outputKey, convertVal(rule, rule.getDefaultValue(), inputMap));
@@ -90,16 +105,18 @@ public class Converter {
         mappedInputKeys.addAll(resolveArrayMappings(flatInputMap, flatOutputMap, allMappedKeys, absentInputKeys));
 
         if (addReports) {
+            final String reportPrefix = outputFormat == DataFormat.XML ? outputPrefix : "";
+
             // unmapped source keys present in the input message
             final Set<String> unmappedInputKeys = SetUtils.difference(flatInputMap.keySet(), mappedInputKeys);
-            unmappedInputKeys.forEach(inputKey -> flatOutputMap.put(REPORT_UNMAPPED_PREFIX + "." + inputKey, flatInputMap.get(inputKey)));
+            unmappedInputKeys.forEach(inputKey -> flatOutputMap.put(reportPrefix + REPORT_UNMAPPED_PREFIX + "." + inputKey, flatInputMap.get(inputKey)));
 
             // mapped but absent in input message
-            flatOutputMap.put(REPORT_ABSENT_PREFIX, absentInputKeys);
+            flatOutputMap.put(reportPrefix + REPORT_ABSENT_PREFIX, absentInputKeys);
 
             // report duplicate mapped keys (often multiple casing)
-            flatOutputMap.put(REPORT_DUPLICATE_INPUT_PREFIX, findDuplicateInputKeys(ruleset));
-            flatOutputMap.put(REPORT_DUPLICATE_OUTPUT_PREFIX, findDuplicateOutputKeys(ruleset));
+            flatOutputMap.put(reportPrefix + REPORT_DUPLICATE_INPUT_PREFIX, findDuplicateInputKeys(ruleset));
+            flatOutputMap.put(reportPrefix + REPORT_DUPLICATE_OUTPUT_PREFIX, findDuplicateOutputKeys(ruleset));
         } else {
             flatOutputMap.entrySet().removeIf(entry -> entry.getKey().startsWith(REPORT_PREFIX));
         }

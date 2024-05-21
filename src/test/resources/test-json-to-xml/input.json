@@ -1,0 +1,21 @@
+{
+    "ROOT": {
+        "INFO": {
+            "PRIMARY": {
+                "ID": "abcd1234",
+                "ANOTHER_ID": "999-xyz-123",
+                "NAME": "hello world!",
+                "COUNT": "99"
+            },
+            "SECONDARY": {
+                "LOG": "something"
+            },
+            "SOME_LIST": {
+                "ITEM": [
+                    "a",
+                    "b"
+                ]
+            }
+        }
+    }
+}
