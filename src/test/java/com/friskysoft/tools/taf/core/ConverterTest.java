@@ -137,7 +137,6 @@ public class ConverterTest {
                         "UNMAPPED_PRESENT_INPUT", Map.of(
                                 "ROOT", Map.of(
                                         "INFO", Map.of(
-                                                "schema", "schema.xsd",
                                                 "PRIMARY", Map.of(
                                                         "ANOTHER_ID", "999-xyz-123"
                                                 ),
@@ -167,7 +166,7 @@ public class ConverterTest {
     }
 
     @Test
-    public void testJsonToXml() throws JSONException {
+    public void testJsonToXml() {
         String rulesetPath = ResourceUtil.absolutePath("test-json-to-xml/ruleset.yaml");
         RuleSet ruleset = YamlRuleSetParser.instance().parseRuleSet(rulesetPath);
         ruleset.setRootOutput("out");
@@ -185,6 +184,29 @@ public class ConverterTest {
 
         String expectedOutputNoReport = ResourceUtil.readFile("test-json-to-xml/expected-output-no-report.xml");
         XmlAssert.assertThat(expectedOutputNoReport).and(outputNoReports).ignoreChildNodesOrder().areSimilar();
+    }
+
+    @Test
+    public void testYamlToXmlToYaml() {
+        String yaml = ResourceUtil.readFile("test-yaml-to-xml/input.yaml");
+        String xml = ResourceUtil.readFile("test-yaml-to-xml/expected-output-no-report.xml");
+
+        // XML -> YAML
+        String outputYaml = Converter.convert(xml, DataFormat.XML, DataFormat.YAML);
+        log.info("outputYaml:\n{}", outputYaml);
+        assertThat(MapperUtil.yaml().read(outputYaml))
+                .isEqualTo(MapperUtil.yaml().read(yaml));
+
+        // YAML -> XML
+        String outputXml = Converter.convert(yaml, DataFormat.YAML, DataFormat.XML);
+        log.info("outputXml:\n{}", outputXml);
+        XmlAssert.assertThat(outputXml).and(xml).ignoreChildNodesOrder().areSimilar();
+
+        // YAML -> XML -> YAML
+        String reverseYaml = Converter.convert(outputXml, DataFormat.XML, DataFormat.YAML);
+        log.info("reverseYaml:\n{}", reverseYaml);
+        assertThat(MapperUtil.yaml().read(reverseYaml))
+                .isEqualTo(MapperUtil.yaml().read(yaml));
     }
 
     @Test

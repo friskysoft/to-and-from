@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DATA>
+    <PRIMARY>
+        <ID>abcd1234</ID>
+        <NAME>hello world!</NAME>
+    </PRIMARY>
+    <SECONDARY>
+        <LOG>something</LOG>
+    </SECONDARY>
+    <SOME_LIST>
+        <ITEM>
+            <NAME>a</NAME>
+            <DESC>aaa</DESC>
+        </ITEM>
+    </SOME_LIST>
+    <SOME_LIST>
+        <ITEM>
+            <NAME>b</NAME>
+            <DESC>bbb</DESC>
+        </ITEM>
+    </SOME_LIST>
+</DATA>

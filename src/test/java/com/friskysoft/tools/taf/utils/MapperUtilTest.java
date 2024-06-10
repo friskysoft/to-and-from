@@ -40,4 +40,47 @@ public class MapperUtilTest {
                                 "</hello>"
                 );
     }
+
+    @Test
+    public void xmlWriterWithPrefix() {
+        Map<String, Object> data = Map.of(
+                "name1:hello", Map.of(
+                        "name2:world", "blah"
+                )
+        );
+        String xml = MapperUtil.xml().write(data);
+        xml = xml.trim()
+                .replace("\r\n", "")
+                .replace("\n", "");
+        assertThat(xml)
+                .isEqualTo(
+                        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                                "<name1:hello>" +
+                                "    <name2:world>blah</name2:world>" +
+                                "</name1:hello>"
+                );
+    }
+
+    @Test
+    public void xmlReaderWithPrefix() {
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                "<name1:hello>" +
+                "    <name1:world>blah</name1:world>" +
+                "    <name1:foo>" +
+                "       <name2:bar>1</name2:bar>" +
+                "       <name2:bar>2</name2:bar>" +
+                "    </name1:foo>" +
+                "</name1:hello>";
+
+        Map<String, Object> expected = Map.of(
+                "name1:hello", Map.of(
+                        "name1:world", "blah",
+                        "name1:foo", Map.of("name2:bar", List.of("1", "2"))
+                )
+        );
+
+        Map<String, Object> parsed = MapperUtil.xml().read(xml);
+
+        assertThat(parsed).isEqualTo(expected);
+    }
 }

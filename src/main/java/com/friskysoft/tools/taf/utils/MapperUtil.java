@@ -1,13 +1,12 @@
 package com.friskysoft.tools.taf.utils;
 
+import com.ctc.wstx.stax.WstxInputFactory;
+import com.ctc.wstx.stax.WstxOutputFactory;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.friskysoft.tools.taf.models.DataFormat;
@@ -17,6 +16,7 @@ import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.stream.XMLInputFactory;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,9 +63,11 @@ public class MapperUtil {
         this.format = format;
         switch (format) {
             case XML:
-                JacksonXmlModule xmlModule = new JacksonXmlModule();
-                xmlModule.setDefaultUseWrapper(false);
-                mapper = new XmlMapper(xmlModule);
+                final XMLInputFactory inputFactory = new WstxInputFactory();
+                inputFactory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, Boolean.FALSE);
+                final XmlFactory xmlFactory = new XmlFactory(inputFactory, new WstxOutputFactory());
+
+                mapper = XmlMapper.builder(xmlFactory).defaultUseWrapper(false).build();
                 mapper.disable(SerializationFeature.WRAP_ROOT_VALUE);
                 mapper.disable(DeserializationFeature.UNWRAP_ROOT_VALUE);
                 mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -86,16 +88,20 @@ public class MapperUtil {
     }
 
     public String write(Object data) {
+        return write(data, true);
+    }
+
+    public String write(Object data, boolean prettyPrint) {
         try {
+            final ObjectWriter writer = prettyPrint ? mapper.writerWithDefaultPrettyPrinter() : mapper.writer();
             if (format == DataFormat.XML) {
-                String xml = mapper.writerWithDefaultPrettyPrinter().withoutRootName().writeValueAsString(data);
-                return xml
+                return writer.withoutRootName().writeValueAsString(data)
                         .replace("</>", "")
                         .replace("  <", "<")
                         .replace("  ", "    ")
                         .replace("<>", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
             } else {
-                return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);
+                return writer.writeValueAsString(data);
             }
         } catch (Exception ex) {
             throw new ToAndFromException("Unable to convert data to " + format, ex);

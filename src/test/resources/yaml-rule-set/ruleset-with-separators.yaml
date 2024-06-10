@@ -1,0 +1,9 @@
+output:
+  field.meta[0].key:
+    default: foo
+  field.meta[0].val:
+    from: props.foo
+  field.meta[1].key:
+    default: bar
+  field.meta[1].val:
+    from: props.bar

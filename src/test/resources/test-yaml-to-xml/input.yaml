@@ -1,0 +1,13 @@
+DATA:
+  PRIMARY:
+    ID: abcd1234
+    NAME: hello world!
+  SECONDARY:
+    LOG: something
+  SOME_LIST:
+    - ITEM:
+        NAME: a
+        DESC: aaa
+    - ITEM:
+        NAME: b
+        DESC: bbb
